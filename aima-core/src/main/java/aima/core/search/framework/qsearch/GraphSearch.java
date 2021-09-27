@@ -1,9 +1,9 @@
 package aima.core.search.framework.qsearch;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 
 import aima.core.search.framework.Node;
 import aima.core.search.framework.NodeFactory;
@@ -46,8 +46,8 @@ import aima.core.search.framework.problem.Problem;
  * @author Ruediger Lunde
  */
 public class GraphSearch<S, A> extends TreeSearch<S, A> {
-
-	private Set<S> explored = new HashSet<>();
+	
+	private Map<S, Node> reached = new HashMap<S, Node>();
 
 	public GraphSearch() {
 		this(new NodeFactory<>());
@@ -64,7 +64,7 @@ public class GraphSearch<S, A> extends TreeSearch<S, A> {
 	@Override
 	public Optional<Node<S, A>> findNode(Problem<S, A> problem, Queue<Node<S, A>> frontier) {
 		// initialize the explored set to be empty
-		explored.clear();
+		reached.clear();
 		return super.findNode(problem, frontier);
 	}
 
@@ -74,9 +74,10 @@ public class GraphSearch<S, A> extends TreeSearch<S, A> {
 	 */
 	@Override
 	protected void addToFrontier(Node<S, A> node) {
-		if (!explored.contains(node.getState())) {
+		if (! reached.containsKey(node.getState()) || node.getPathCost() < reached.get(node.getState()).getPathCost()) {
 			frontier.add(node);
 			updateMetrics(frontier.size());
+			reached.put(node.getState(), node); //Se actualiza o añade el nodo
 		}
 	}
 
@@ -92,7 +93,6 @@ public class GraphSearch<S, A> extends TreeSearch<S, A> {
 	protected Node<S, A> removeFromFrontier() {
 		cleanUpFrontier(); // not really necessary because isFrontierEmpty should be called before...
 		Node<S, A> result = frontier.remove();
-		explored.add(result.getState());
 		updateMetrics(frontier.size());
 		return result;
 	}
@@ -113,7 +113,9 @@ public class GraphSearch<S, A> extends TreeSearch<S, A> {
 	 * of the frontier.
 	 */
 	private void cleanUpFrontier() {
-		while (!frontier.isEmpty() && explored.contains(frontier.element().getState()))
+		while (! frontier.isEmpty() &&
+			frontier.element().getPathCost() > reached.get(frontier.element().getState()).getPathCost())
+			
 			frontier.remove();
 	}
 }
