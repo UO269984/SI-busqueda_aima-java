@@ -97,14 +97,14 @@ public class EightPuzzleDemo {
 //			new EightPuzzleBoard(new int[] { 0, 8, 7, 6, 5, 4, 3, 2, 1 });
 
 	public static void main(String[] args) {
-		System.out.println("Initial State:\n" + inicial);
+		System.out.println("Initial State:\n" + inicial.toStringBlock());
 		//eightPuzzleDLSDemo();
 		//eightPuzzleIDLSDemo();
 		//eightPuzzleGreedyBestFirstDemo();
 		//eightPuzzleGreedyBestFirstManhattanDemo();
 		//eightPuzzleAStarDemo();
 		eightPuzzleAStarManhattanDemo();
-		eightPuzzleAStarEpsilonWeightedManhattanDemo();
+		//eightPuzzleAStarEpsilonWeightedManhattanDemo();
 		//eightPuzzleSimulatedAnnealingDemo();
 	}
 

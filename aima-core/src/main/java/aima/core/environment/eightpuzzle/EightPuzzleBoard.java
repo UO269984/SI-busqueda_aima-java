@@ -3,6 +3,7 @@ package aima.core.environment.eightpuzzle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import aima.core.agent.Action;
 import aima.core.agent.impl.DynamicAction;
@@ -128,9 +129,13 @@ public class EightPuzzleBoard implements Cloneable {
 	public int hashCode() {
 		return Arrays.hashCode(state);
 	}
-
+	
 	@Override
 	public String toString() {
+		return Arrays.stream(state).mapToObj(String::valueOf).collect(Collectors.joining(" "));
+	}
+	
+	public String toStringBlock() {
 		return state[0] + " " + state[1] + " " + state[2] + "\n"
 				+ state[3] + " " + state[4] + " " + state[5] + "\n"
 				+ state[6] + " " + state[7] + " " + state[8];

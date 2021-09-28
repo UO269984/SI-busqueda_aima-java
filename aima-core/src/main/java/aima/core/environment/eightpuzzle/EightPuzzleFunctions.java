@@ -92,7 +92,7 @@ public class EightPuzzleFunctions {
 		for (int val = 1; val <= 8; val++) {
 			XYLocation locCurr = currState.getLocationOf(val);
 			XYLocation locGoal = GOAL_STATE.getLocationOf(val);
-			int res = Math.abs(locGoal.getY() - locCurr.getX()) + Math.abs(locGoal.getY() - locCurr.getY());
+			int res = Math.abs(locGoal.getX() - locCurr.getX()) + Math.abs(locGoal.getY() - locCurr.getY());
 			result += (res == 2) ? res * Math.pow(2, val) : 0;
 		}
 		return result;

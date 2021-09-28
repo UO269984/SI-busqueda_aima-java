@@ -77,8 +77,10 @@ public class TreeSearch<S, A> extends QueueSearch<S, A> {
 			// choose a leaf node and remove it from the frontier
 			Node<S, A> node = removeFromFrontier();
 			// if the node contains a goal state then return the corresponding solution
-			if (!earlyGoalTest && problem.testSolution(node))
+			if (!earlyGoalTest && problem.testSolution(node)) {
+				metrics.set(METRIC_TIME_TAKEN, System.currentTimeMillis() - t0);
 				return asOptional(node);
+			}
 			
 			if (evalFn != null)
 				System.out.println("f(" + node.getState() + ") = " + evalFn.applyAsDouble(node));
@@ -86,13 +88,11 @@ public class TreeSearch<S, A> extends QueueSearch<S, A> {
 			// expand the chosen node and add the successor nodes to the frontier
 			for (Node<S, A> successor : nodeFactory.getSuccessors(node, problem)) {
 				addToFrontier(successor);
-				if (earlyGoalTest && problem.testSolution(successor)) {
-					metrics.set(TIME_TAKEN, System.currentTimeMillis() - t0);
+				if (earlyGoalTest && problem.testSolution(successor))
 					return asOptional(successor);
-				}
 			}
 		}
-		metrics.set(TIME_TAKEN, System.currentTimeMillis() - t0);
+		metrics.set(METRIC_TIME_TAKEN, System.currentTimeMillis() - t0);
 		// if the frontier is empty then return failure
 		return Optional.empty();
 	}
