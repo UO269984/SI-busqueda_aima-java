@@ -77,6 +77,9 @@ public class TreeSearch<S, A> extends QueueSearch<S, A> {
 			// if the node contains a goal state then return the corresponding solution
 			if (!earlyGoalTest && problem.testSolution(node))
 				return asOptional(node);
+			
+			if (evalFn != null)
+				System.out.println("f(" + node.getState() + ") = " + evalFn.applyAsDouble(node));
 
 			// expand the chosen node and add the successor nodes to the frontier
 			for (Node<S, A> successor : nodeFactory.getSuccessors(node, problem)) {

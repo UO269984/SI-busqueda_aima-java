@@ -4,6 +4,7 @@ import aima.core.search.framework.Metrics;
 import aima.core.search.framework.Node;
 import aima.core.search.framework.NodeFactory;
 import aima.core.search.framework.problem.Problem;
+import aima.core.search.informed.EvaluationFunction;
 
 import java.util.Optional;
 import java.util.Queue;
@@ -31,11 +32,14 @@ public abstract class QueueSearch<S, A> {
 	final protected NodeFactory<S, A> nodeFactory;
 	protected boolean earlyGoalTest = false;
 	protected Metrics metrics = new Metrics();
+	
+	public EvaluationFunction<S, A> evalFn;
 
 	/** Stores the provided node expander and adds a node listener to it. */
 	protected QueueSearch(NodeFactory<S, A> nodeFactory) {
 		this.nodeFactory = nodeFactory;
 		nodeFactory.addNodeListener((node) -> metrics.incrementInt(METRIC_NODES_EXPANDED));
+		evalFn = null;
 	}
 
 	/**
