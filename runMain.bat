@@ -1,0 +1,1 @@
+java -cp bin aima.gui.demo.search.EightPuzzleDemo
