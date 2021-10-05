@@ -29,23 +29,23 @@ import java.util.function.Predicate;
 
 public class NQueensDemo {
 
-	private static final int boardSize = 8;
+	private static final int boardSize = 6;
 
 	public static void main(String[] args) {
 		startNQueensDemo();
 	}
 
 	private static void startNQueensDemo() {
-		solveNQueensWithDepthFirstSearch();
-		solveNQueensWithBreadthFirstSearch();
+		//solveNQueensWithDepthFirstSearch();
+		//solveNQueensWithBreadthFirstSearch();
 		solveNQueensWithAStarSearch();
-		solveNQueensWithAStarSearch4e();
-		solveNQueensWithRecursiveDLS();
-		solveNQueensWithIterativeDeepeningSearch();
-		solveNQueensWithSimulatedAnnealingSearch();
-		solveNQueensWithHillClimbingSearch();
-		solveNQueensWithGeneticAlgorithmSearch();
-		solveNQueensWithRandomWalk();
+		//solveNQueensWithAStarSearch4e();
+		//solveNQueensWithRecursiveDLS();
+		//solveNQueensWithIterativeDeepeningSearch();
+		//solveNQueensWithSimulatedAnnealingSearch();
+		//solveNQueensWithHillClimbingSearch();
+		//solveNQueensWithGeneticAlgorithmSearch();
+		//solveNQueensWithRandomWalk();
 	}
 
 	private static void solveNQueensWithDepthFirstSearch() {

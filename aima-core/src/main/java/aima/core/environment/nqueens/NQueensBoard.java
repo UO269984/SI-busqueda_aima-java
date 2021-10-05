@@ -3,6 +3,7 @@ package aima.core.environment.nqueens;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 import aima.core.util.datastructure.XYLocation;
 
@@ -17,7 +18,7 @@ public class NQueensBoard {
 
 	/** Parameters for initialization. */
 	public enum Config {
-		EMPTY, QUEENS_IN_FIRST_ROW, QUEEN_IN_EVERY_COL
+		EMPTY, QUEENS_IN_FIRST_ROW, QUEEN_IN_EVERY_COL, QUEEN_IN_EVERY_COL_ROW
 	}
 
 	/**
@@ -53,10 +54,27 @@ public class NQueensBoard {
 		if (config == Config.QUEENS_IN_FIRST_ROW) {
 			for (int col = 0; col < size; col++)
 				addQueenAt(new XYLocation(col, 0));
-		} else if (config == Config.QUEEN_IN_EVERY_COL) {
+		}
+		else if (config == Config.QUEEN_IN_EVERY_COL) {
 			Random r = new Random();
 			for (int col = 0; col < size; col++)
 				addQueenAt(new XYLocation(col, r.nextInt(size)));
+		}
+		else if (config == Config.QUEEN_IN_EVERY_COL_ROW) {
+			int[] queensPos = IntStream.range(0, size).toArray();
+			
+			Random r = new Random();
+			for (int i = 0; i < size; i++) {
+				int randPos = r.nextInt();
+				
+				if (randPos != i) {
+					int aux = queensPos[randPos];
+					queensPos[randPos] = queensPos[i];
+					queensPos[i] = aux;
+				}
+			}
+			for (int i = 0; i < size; i++)
+				addQueenAt(new XYLocation(i, queensPos[i]));
 		}
 	}
 
