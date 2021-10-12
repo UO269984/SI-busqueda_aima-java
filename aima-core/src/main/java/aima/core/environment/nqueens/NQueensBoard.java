@@ -65,7 +65,7 @@ public class NQueensBoard {
 			
 			Random r = new Random();
 			for (int i = 0; i < size; i++) {
-				int randPos = r.nextInt();
+				int randPos = r.nextInt(size);
 				
 				if (randPos != i) {
 					int aux = queensPos[randPos];
@@ -227,6 +227,12 @@ public class NQueensBoard {
 				result++;
 
 		return result;
+	}
+	
+	public int maxNumberOfAttacksOneDirection(XYLocation pos) {
+		return Math.max(numberOfHorizontalAttacksOn(pos.getX(), pos.getY()),
+                Math.max(numberOfVerticalAttacksOn(pos.getX(), pos.getY()),
+                numberOfDiagonalAttacksOn(pos.getX(), pos.getY())));
 	}
 
 	@Override

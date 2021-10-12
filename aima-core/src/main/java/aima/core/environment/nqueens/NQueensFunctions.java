@@ -92,6 +92,22 @@ public class NQueensFunctions {
     public static boolean testGoal(NQueensBoard state) {
         return state.getNumberOfQueensOnBoard() == state.getSize() && state.getNumberOfAttackingPairs() == 0;
     }
+    
+    public static double getHeuristicProbabilisticEstimationOfSolution(Node<NQueensBoard, QueenAction> node) {
+        NQueensBoard board = node.getState();
+        int boardSize = board.getSize();
+        
+        int k = board.getNumberOfQueensOnBoard();
+        int nonAttackedPosInFreeSpace = 0;
+        for (int i = k; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                if (board.getNumberOfAttacksOn(new XYLocation(i, j)) == 0)
+                    nonAttackedPosInFreeSpace++;
+            }
+        }
+        
+        return (boardSize - k) / (nonAttackedPosInFreeSpace / (double) (boardSize * (boardSize - k)));
+    }
 
     /**
      * Estimates the distance to goal by the number of attacking pairs of queens on
@@ -102,6 +118,21 @@ public class NQueensFunctions {
     }
     
     public static double getNumberOfAttackedQueens(Node<NQueensBoard, QueenAction> node) {
-        return 0;
+        NQueensBoard board = node.getState();
+        return board.getQueenPositions().stream().filter(queenPos -> board.getNumberOfAttacksOn(queenPos) > 0).count();
+    }
+    
+    public static double getMaximumNumberOfQueensAlignedMinusOne(Node<NQueensBoard, QueenAction> node) {
+        NQueensBoard board = node.getState();
+        int maxAligned = 0;
+        
+        for (XYLocation queenPos : board.getQueenPositions())
+            maxAligned = Math.max(maxAligned, board.maxNumberOfAttacksOneDirection(queenPos));
+        
+        return maxAligned;
+    }
+    
+    private static boolean existsQueen(NQueensBoard board, int x, int y) {
+        return board.queenExistsAt(new XYLocation(x, y));
     }
 }

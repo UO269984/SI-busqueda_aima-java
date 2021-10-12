@@ -1,1 +1,1 @@
-java -cp bin aima.gui.demo.search.NQueensDemo
+java -Xmx4000M -cp bin aima.gui.demo.search.NQueensDemo

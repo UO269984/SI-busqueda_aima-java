@@ -10,6 +10,7 @@ import aima.core.search.framework.problem.Problem;
 import aima.core.search.framework.qsearch.GraphSearch;
 import aima.core.search.framework.qsearch.GraphSearch4e;
 import aima.core.search.framework.qsearch.TreeSearch;
+import aima.core.search.framework.Metrics;
 import aima.core.search.informed.AStarSearch;
 import aima.core.search.local.*;
 import aima.core.search.uninformed.BreadthFirstSearch;
@@ -29,7 +30,8 @@ import java.util.function.Predicate;
 
 public class NQueensDemo {
 
-	private static final int boardSize = 6;
+	private static int boardSize = 0;
+	private static final int NUM_REPS = 30;
 
 	public static void main(String[] args) {
 		startNQueensDemo();
@@ -38,7 +40,6 @@ public class NQueensDemo {
 	private static void startNQueensDemo() {
 		//solveNQueensWithDepthFirstSearch();
 		//solveNQueensWithBreadthFirstSearch();
-		solveNQueensWithAStarSearch();
 		//solveNQueensWithAStarSearch4e();
 		//solveNQueensWithRecursiveDLS();
 		//solveNQueensWithIterativeDeepeningSearch();
@@ -46,6 +47,22 @@ public class NQueensDemo {
 		//solveNQueensWithHillClimbingSearch();
 		//solveNQueensWithGeneticAlgorithmSearch();
 		//solveNQueensWithRandomWalk();
+		
+		for (int i = 10; i <= 16; i += 8) {
+			boardSize = i;
+			System.out.println("Board size: " + boardSize);
+			
+			//getAveragePathCost();
+			solveNQueensWithAStarSearch();
+		}
+	}
+	
+	private static void getAveragePathCost() {
+		double pathCost = 0;
+		for (int rep = 0; rep < NUM_REPS; rep++)
+			pathCost += solveNQueensWithAStarSearch().getDouble("pathCost");
+
+		System.out.println("Average path cost: " + (pathCost / NUM_REPS) + "\n\n");
 	}
 
 	private static void solveNQueensWithDepthFirstSearch() {
@@ -70,17 +87,19 @@ public class NQueensDemo {
 		System.out.println(search.getMetrics());
 	}
 
-	private static void solveNQueensWithAStarSearch() {
-		System.out.println("\n--- NQueensDemo A* (complete state formulation, graph search 3e) ---");
+	private static Metrics solveNQueensWithAStarSearch() {
+		//System.out.println("\n--- NQueensDemo A* (complete state formulation, graph search 3e) ---");
 
-		Problem<NQueensBoard, QueenAction> problem = NQueensFunctions.createCompleteStateFormulationProblem
-				(boardSize, Config.QUEENS_IN_FIRST_ROW);
+		Problem<NQueensBoard, QueenAction> problem = NQueensFunctions.createCompleteStateFormulationProblem(boardSize, Config.QUEENS_IN_FIRST_ROW);
+		//Problem<NQueensBoard, QueenAction> problem = NQueensFunctions.createIncrementalFormulationProblem(boardSize);
+		
 		SearchForActions<NQueensBoard, QueenAction> search = new AStarSearch<>
 				(new GraphSearch<>(), NQueensFunctions::getNumberOfAttackingPairs);
 		Optional<List<QueenAction>> actions = search.findActions(problem);
 
-		actions.ifPresent(qActions -> qActions.forEach(System.out::println));
-		System.out.println(search.getMetrics());
+		//actions.ifPresent(qActions -> qActions.forEach(System.out::println));
+		System.out.println(search.getMetrics() + "\n");
+		return search.getMetrics();
 	}
 
 	private static void solveNQueensWithAStarSearch4e() {
