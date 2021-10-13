@@ -7,6 +7,8 @@ import aima.core.util.Util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.function.Predicate;
 
@@ -62,19 +64,21 @@ public class GeneticAlgorithm<A> {
 	protected int individualLength;
 	protected List<A> finiteAlphabet;
 	protected double mutationProbability;
+	protected double crossoverProbability;
 	
 	protected Random random;
 	private List<ProgressTracker<A>> progressTrackers = new ArrayList<>();
 
-	public GeneticAlgorithm(int individualLength, Collection<A> finiteAlphabet, double mutationProbability) {
-		this(individualLength, finiteAlphabet, mutationProbability, new Random());
+	public GeneticAlgorithm(int individualLength, Collection<A> finiteAlphabet, double mutationProbability, double crossoverProbability) {
+		this(individualLength, finiteAlphabet, mutationProbability, crossoverProbability, new Random());
 	}
 
-	public GeneticAlgorithm(int individualLength, Collection<A> finiteAlphabet, double mutationProbability,
+	public GeneticAlgorithm(int individualLength, Collection<A> finiteAlphabet, double mutationProbability, double crossoverProbability,
 			Random random) {
 		this.individualLength = individualLength;
 		this.finiteAlphabet = new ArrayList<A>(finiteAlphabet);
 		this.mutationProbability = mutationProbability;
+		this.crossoverProbability = crossoverProbability;
 		this.random = random;
 
 		assert (this.mutationProbability >= 0.0 && this.mutationProbability <= 1.0);
@@ -233,6 +237,10 @@ public class GeneticAlgorithm<A> {
 	protected List<Individual<A>> nextGeneration(List<Individual<A>> population, FitnessFunction<A> fitnessFn) {
 		// new_population <- empty set
 		List<Individual<A>> newPopulation = new ArrayList<>(population.size());
+		
+		//Elitismo
+		newPopulation.add(retrieveBestIndividual(population, fitnessFn));
+		
 		// for i = 1 to SIZE(population) do
 		for (int i = 0; i < population.size(); i++) {
 			// x <- RANDOM-SELECTION(population, FITNESS-FN)
@@ -240,13 +248,16 @@ public class GeneticAlgorithm<A> {
 			// y <- RANDOM-SELECTION(population, FITNESS-FN)
 			Individual<A> y = randomSelection(population, fitnessFn);
 			// child <- REPRODUCE(x, y)
-			Individual<A> child = reproduce(x, y);
-			// if (small random probability) then child <- MUTATE(child)
-			if (random.nextDouble() <= mutationProbability) {
-				child = mutate(child);
+			if (random.nextDouble() <= crossoverProbability) {
+				Individual<A> child = reproduceOX(x, y);
+				
+				// if (small random probability) then child <- MUTATE(child)
+				if (random.nextDouble() <= mutationProbability)
+					child = mutate(child);
+				
+				// add child to new_population
+				newPopulation.add(child);
 			}
-			// add child to new_population
-			newPopulation.add(child);
 		}
 		notifyProgressTrackers(getIterations(), population);
 		return newPopulation;
@@ -260,9 +271,18 @@ public class GeneticAlgorithm<A> {
 
 		// Determine all of the fitness values
 		double[] fValues = new double[population.size()];
+		double minFitness = fitnessFn.apply(population.get(0));
+		
 		for (int i = 0; i < population.size(); i++) {
-			fValues[i] = fitnessFn.apply(population.get(i));
+			double fitness = fitnessFn.apply(population.get(i));
+			fValues[i] = fitness;
+			if (minFitness > fitness)
+				minFitness = fitness;
 		}
+		
+		for (int i = 0; i < fValues.length; i++) //Escalado
+			fValues[i] -= minFitness;
+		
 		// Normalize the fitness values
 		fValues = Util.normalize(fValues);
 		double prob = random.nextDouble();
@@ -294,6 +314,31 @@ public class GeneticAlgorithm<A> {
 		childRepresentation.addAll(y.getRepresentation().subList(c, individualLength));
 
 		return new Individual<A>(childRepresentation);
+	}
+	
+	protected Individual<A> reproduceOX(Individual<A> x, Individual<A> y) {
+		int size = x.length();
+		List<A> xList = x.getRepresentation();
+		List<A> yList = y.getRepresentation();
+		
+		Random rand = new Random();
+		int p1 = rand.nextInt(size);
+		int p2 = rand.nextInt(size);
+		
+		List<A> chlid = new ArrayList<A>(xList);
+		Set<A> xSelected = new HashSet<A>(); //Elementos seleccionados de x
+		for (int i = p1; i != p2; i = (i + 1) % size)
+			xSelected.add(xList.get(i));
+		
+		int pos = p2;
+		for (int i = 0; pos != p1; i++) {
+			//System.out.println(p1 + "  " + p2 + "  " + pos);
+			if (! xSelected.contains(yList.get(i))) {
+				chlid.set(pos, yList.get(i));
+				pos = (pos + 1) % size;
+			}
+		}
+		return new Individual<A>(chlid);
 	}
 
 	protected Individual<A> mutate(Individual<A> child) {
