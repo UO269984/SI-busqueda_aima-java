@@ -25,7 +25,7 @@ import aima.core.util.datastructure.XYLocation;
 public class NQueensGenAlgoUtil {
 
 	public static FitnessFunction<Integer> getFitnessFunction() {
-		return new NQueensFitnessFunction();
+		return new NQueensAttackedFitnessFunction();
 	}
 	
 	public static Predicate<Individual<Integer>> getGoalTest() {
@@ -96,6 +96,14 @@ public class NQueensGenAlgoUtil {
 			}
 
 			return fitness;
+		}
+	}
+	
+	public static class NQueensAttackedFitnessFunction implements FitnessFunction<Integer> {
+		
+		public double apply(Individual<Integer> individual) {
+			NQueensBoard board = getBoardForIndividual(individual);
+			return board.getQueenPositions().stream().filter(queenPos -> board.getNumberOfAttacksOn(queenPos) == 0).count();
 		}
 	}
 

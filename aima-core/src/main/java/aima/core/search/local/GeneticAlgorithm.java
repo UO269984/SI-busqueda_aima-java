@@ -258,6 +258,8 @@ public class GeneticAlgorithm<A> {
 				// add child to new_population
 				newPopulation.add(child);
 			}
+			else
+				newPopulation.add(x);
 		}
 		notifyProgressTrackers(getIterations(), population);
 		return newPopulation;
@@ -317,38 +319,37 @@ public class GeneticAlgorithm<A> {
 	}
 	
 	protected Individual<A> reproduceOX(Individual<A> x, Individual<A> y) {
-		int size = x.length();
 		List<A> xList = x.getRepresentation();
 		List<A> yList = y.getRepresentation();
 		
 		Random rand = new Random();
-		int p1 = rand.nextInt(size);
-		int p2 = rand.nextInt(size);
+		int p1 = rand.nextInt(this.individualLength);
+		int p2 = rand.nextInt(this.individualLength);
 		
 		List<A> chlid = new ArrayList<A>(xList);
 		Set<A> xSelected = new HashSet<A>(); //Elementos seleccionados de x
-		for (int i = p1; i != p2; i = (i + 1) % size)
+		for (int i = p1; i != p2; i = (i + 1) % this.individualLength)
 			xSelected.add(xList.get(i));
 		
 		int pos = p2;
 		for (int i = 0; pos != p1; i++) {
-			//System.out.println(p1 + "  " + p2 + "  " + pos);
 			if (! xSelected.contains(yList.get(i))) {
 				chlid.set(pos, yList.get(i));
-				pos = (pos + 1) % size;
+				pos = (pos + 1) % this.individualLength;
 			}
 		}
 		return new Individual<A>(chlid);
 	}
 
 	protected Individual<A> mutate(Individual<A> child) {
-		int mutateOffset = randomOffset(individualLength);
-		int alphaOffset = randomOffset(finiteAlphabet.size());
-
+		int mutatePos1 = randomOffset(this.individualLength);
+		int mutatePos2 = randomOffset(this.individualLength);
+		
 		List<A> mutatedRepresentation = new ArrayList<A>(child.getRepresentation());
-
-		mutatedRepresentation.set(mutateOffset, finiteAlphabet.get(alphaOffset));
-
+		A aux = mutatedRepresentation.get(mutatePos1);
+		mutatedRepresentation.set(mutatePos1, mutatedRepresentation.get(mutatePos2));
+		mutatedRepresentation.set(mutatePos2, aux);
+		
 		return new Individual<A>(mutatedRepresentation);
 }
 
