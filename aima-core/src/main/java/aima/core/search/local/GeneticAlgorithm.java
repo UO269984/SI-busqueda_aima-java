@@ -94,9 +94,9 @@ public class GeneticAlgorithm<A> {
 	 * iterations.
 	 */
 	public Individual<A> geneticAlgorithm(Collection<Individual<A>> initPopulation,
-			FitnessFunction<A> fitnessFn, final int maxIterations) {
+			FitnessFunction<A> fitnessFn, final int maxIterations, List<FitnessData> fitnessHistoric) {
 		Predicate<Individual<A>> goalTest = state -> getIterations() >= maxIterations;
-		return geneticAlgorithm(initPopulation, fitnessFn, goalTest, 0L);
+		return geneticAlgorithm(initPopulation, fitnessFn, goalTest, 0L, fitnessHistoric);
 	}
 	
 	/**
@@ -122,7 +122,8 @@ public class GeneticAlgorithm<A> {
 	// inputs: population, a set of individuals
 	// FITNESS-FN, a function that measures the fitness of an individual
 	public Individual<A> geneticAlgorithm(Collection<Individual<A>> initPopulation, FitnessFunction<A> fitnessFn,
-										  Predicate<Individual<A>> goalTest, long maxTimeMilliseconds) {
+		Predicate<Individual<A>> goalTest, long maxTimeMilliseconds, List<FitnessData> fitnessHistoric) {
+		
 		Individual<A> bestIndividual = null;
 
 		// Create a local copy of the population to work with
@@ -140,7 +141,9 @@ public class GeneticAlgorithm<A> {
 			bestIndividual = retrieveBestIndividual(population, fitnessFn);
 
 			updateMetrics(population, ++itCount, System.currentTimeMillis() - startTime);
-
+			if (fitnessHistoric != null)
+				fitnessHistoric.add(new FitnessData(fitnessFn.apply(bestIndividual), population.stream().mapToDouble(fitnessFn::apply).sum() / population.size()));
+			
 			// until some individual is fit enough, or enough time has elapsed
 			if (maxTimeMilliseconds > 0L && (System.currentTimeMillis() - startTime) > maxTimeMilliseconds)
 				break;
@@ -351,7 +354,7 @@ public class GeneticAlgorithm<A> {
 		mutatedRepresentation.set(mutatePos2, aux);
 		
 		return new Individual<A>(mutatedRepresentation);
-}
+	}
 
 	protected int randomOffset(int length) {
 		return random.nextInt(length);

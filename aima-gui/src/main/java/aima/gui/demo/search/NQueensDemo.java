@@ -178,37 +178,51 @@ public class NQueensDemo {
 		FitnessFunction<Integer> fitnessFunction = NQueensGenAlgoUtil.getFitnessFunction();
 		Predicate<Individual<Integer>> goalTest = NQueensGenAlgoUtil.getGoalTest();
 		// Generate an initial population
-		Set<Individual<Integer>> population = new HashSet<Individual<Integer>>();
-		for (int i = 0; i < popSize; i++)
-			population.add(NQueensGenAlgoUtil.generateRandomIndividual(boardSize));
+		int numSolutions = 0;
+		double fitness = 0;
 		
-		GeneticAlgorithm<Integer> ga = new GeneticAlgorithm<Integer>(boardSize,
-			NQueensGenAlgoUtil.getFiniteAlphabetForBoardOfSize(boardSize), mutationProbability, crossoverProbability);
+		for (int rep = 0; rep < NUM_REPS; rep++) {
+			
+			Set<Individual<Integer>> population = new HashSet<Individual<Integer>>();
+			for (int i = 0; i < popSize; i++)
+				population.add(NQueensGenAlgoUtil.generateRandomIndividual(boardSize));
+			
+			GeneticAlgorithm<Integer> ga = new GeneticAlgorithm<Integer>(boardSize,
+				NQueensGenAlgoUtil.getFiniteAlphabetForBoardOfSize(boardSize), mutationProbability, crossoverProbability);
+			
+			// Run for a set amount of time
+			//List<FitnessData> fitnessHistoric = new ArrayList<FitnessData>();
+			Individual<Integer> bestIndividual = ga.geneticAlgorithm(population, fitnessFunction, numberOfGenerations, null);
+			
+			//printGeneticData(bestIndividual, boardSize, fitnessFunction.apply(bestIndividual), goalTest.test(bestIndividual), ga);
+			fitness += fitnessFunction.apply(bestIndividual);
+			if (goalTest.test(bestIndividual))
+				numSolutions++;
+		}
+		System.out.println("Population: " + popSize);
+		System.out.println("Mutation Probability: " + mutationProbability);
+		System.out.println("Crossover Probability: " + crossoverProbability);
+		System.out.println("Num generations: " + numberOfGenerations + "\n");
 		
-		// Run for a set amount of time
-		Individual<Integer> bestIndividual = ga.geneticAlgorithm(population, fitnessFunction, numberOfGenerations);
+		System.out.println("Average fitness: " + fitness / NUM_REPS);
+		System.out.println("Num solutions: " + numSolutions);
+		
+		// Run till goal is achieved
+		/*bestIndividual = ga.geneticAlgorithm(population, fitnessFunction, goalTest, 0L, null);
+		System.out.println("\nMax time unlimited, Best Individual:\n" +
+			NQueensGenAlgoUtil.getBoardForIndividual(bestIndividual));*/
+	}
+	
+	private static void printGeneticData(Individual<Integer> bestIndividual, int boardSize, double bestIndividualFitness, boolean isGoal, GeneticAlgorithm<Integer> ga) {
 		System.out.println("Max time 1 second, Best Individual:\n"
 			+ NQueensGenAlgoUtil.getBoardForIndividual(bestIndividual));
 		System.out.println("Board Size      = " + boardSize);
 		System.out.println("# Board Layouts = " + (new BigDecimal(boardSize)).pow(boardSize));
-		System.out.println("Fitness         = " + fitnessFunction.apply(bestIndividual));
-		System.out.println("Is Goal         = " + goalTest.test(bestIndividual));
+		System.out.println("Fitness         = " + bestIndividualFitness);
+		System.out.println("Is Goal         = " + isGoal);
 		System.out.println("Population Size = " + ga.getPopulationSize());
 		System.out.println("Iterations      = " + ga.getIterations());
 		System.out.println("Took            = " + ga.getTimeInMilliseconds() + "ms.");
-		
-		// Run till goal is achieved
-		/*bestIndividual = ga.geneticAlgorithm(population, fitnessFunction, goalTest, 0L);
-		System.out.println("");
-		System.out.println("Max time unlimited, Best Individual:\n" +
-			NQueensGenAlgoUtil.getBoardForIndividual(bestIndividual));
-		System.out.println("Board Size      = " + boardSize);
-		System.out.println("# Board Layouts = " + (new BigDecimal(boardSize)).pow(boardSize));
-		System.out.println("Fitness         = " + fitnessFunction.apply(bestIndividual));
-		System.out.println("Is Goal         = " + goalTest.test(bestIndividual));
-		System.out.println("Population Size = " + ga.getPopulationSize());
-		System.out.println("Itertions       = " + ga.getIterations());
-		System.out.println("Took            = " + ga.getTimeInMilliseconds() + "ms.");*/
 	}
 
 	// Here, this trivial algorithm outperforms the genetic search approach as described in the textbook!
