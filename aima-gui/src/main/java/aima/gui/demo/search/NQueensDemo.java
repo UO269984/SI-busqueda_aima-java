@@ -60,10 +60,19 @@ public class NQueensDemo {
 	
 	private static void getAveragePathCost() {
 		double pathCost = 0;
-		for (int rep = 0; rep < NUM_REPS; rep++)
-			pathCost += solveNQueensWithAStarSearch().getDouble("pathCost");
-
-		System.out.println("Average path cost: " + (pathCost / NUM_REPS) + "\n\n");
+		double time = 0;
+		int reexpandedNodes = 0;
+		
+		for (int rep = 0; rep < NUM_REPS; rep++) {
+			Metrics m = solveNQueensWithAStarSearch();
+			
+			pathCost += m.getDouble("pathCost");
+			time += m.getDouble("timeTaken");
+			reexpandedNodes += m.getInt("nodesExpandedReinsertedInFrontier");
+		}
+		
+		System.out.println("Average path cost: " + (pathCost / NUM_REPS)
+			+ "\nAverage reexpanded nodes: " + (reexpandedNodes / NUM_REPS) + "\nAverage time: " + (time / NUM_REPS));
 	}
 
 	private static void solveNQueensWithDepthFirstSearch() {
@@ -171,9 +180,9 @@ public class NQueensDemo {
 		System.out.println("\n--- NQueensDemo GeneticAlgorithm ---");
 		
 		final int popSize = 50;
-		final double mutationProbability = 0.15;
-		final double crossoverProbability = 0.9;
-		final int numberOfGenerations = 50;
+		final double mutationProbability = 0.05;
+		final double crossoverProbability = 0.5;
+		final int numberOfGenerations = 100;
 		
 		FitnessFunction<Integer> fitnessFunction = NQueensGenAlgoUtil.getFitnessFunction();
 		Predicate<Individual<Integer>> goalTest = NQueensGenAlgoUtil.getGoalTest();
@@ -181,8 +190,11 @@ public class NQueensDemo {
 		int numSolutions = 0;
 		double fitness = 0;
 		
+		FitnessData[] averageFitness = new FitnessData[numberOfGenerations];
+		for (int i = 0; i < numberOfGenerations; i++)
+			averageFitness[i] = new FitnessData(0, 0);
+		
 		for (int rep = 0; rep < NUM_REPS; rep++) {
-			
 			Set<Individual<Integer>> population = new HashSet<Individual<Integer>>();
 			for (int i = 0; i < popSize; i++)
 				population.add(NQueensGenAlgoUtil.generateRandomIndividual(boardSize));
@@ -191,14 +203,24 @@ public class NQueensDemo {
 				NQueensGenAlgoUtil.getFiniteAlphabetForBoardOfSize(boardSize), mutationProbability, crossoverProbability);
 			
 			// Run for a set amount of time
-			//List<FitnessData> fitnessHistoric = new ArrayList<FitnessData>();
-			Individual<Integer> bestIndividual = ga.geneticAlgorithm(population, fitnessFunction, numberOfGenerations, null);
+			List<FitnessData> fitnessHistoric = new ArrayList<FitnessData>();
+			Individual<Integer> bestIndividual = ga.geneticAlgorithm(population, fitnessFunction, numberOfGenerations, fitnessHistoric);
+			int i = 0;
+			for (FitnessData f : fitnessHistoric) {
+				averageFitness[i].averageFitness += f.averageFitness;
+				averageFitness[i++].bestFitness += f.bestFitness;
+			}
 			
 			//printGeneticData(bestIndividual, boardSize, fitnessFunction.apply(bestIndividual), goalTest.test(bestIndividual), ga);
 			fitness += fitnessFunction.apply(bestIndividual);
 			if (goalTest.test(bestIndividual))
 				numSolutions++;
 		}
+		
+		System.out.println("Average fitness;Best fitness");
+		for (FitnessData f : averageFitness)
+			System.out.println((f.averageFitness / NUM_REPS) + ";" + (f.bestFitness / NUM_REPS));
+		
 		System.out.println("Population: " + popSize);
 		System.out.println("Mutation Probability: " + mutationProbability);
 		System.out.println("Crossover Probability: " + crossoverProbability);
